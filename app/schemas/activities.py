@@ -22,6 +22,15 @@ class CreateActivity(ActivityBase):
     pass
 
 
+class UpdateActivity(BaseModel):
+    """
+    Update Activity model
+    """
+    name: Optional[str] = None
+    points: Optional[int] = None
+    duration: Optional[int] = None
+
+
 class Activity(ActivityBase):
     """
     Full Activity schema

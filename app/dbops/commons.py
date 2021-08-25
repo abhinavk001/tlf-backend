@@ -4,7 +4,11 @@ Common utilities for database operations
 from hashlib import sha256
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from fastapi import Depends
 from database.config_db import Base, SessionLocal
+from database import models
+from dbops.oauth2 import get_current_user
+
 
 
 def hash_password(password: str) -> str:
@@ -44,3 +48,9 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def get_current_user_id(database: Session, current_user: models.User = Depends(get_current_user)):
+    """
+    Get current user id
+    """
+    return database.query(models.User).filter_by(email=current_user["sub"]).first().id

@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from schemas.user import Login, CreateUser, ShowUser
-from dbops.commons import get_db, verify, commit_changes_to_object, hash_password
+from dbops.commons import get_db, verify, commit_changes_to_object, hash_password, get_current_user_id
 from dbops.tokens import create_access_token
 from dbops.oauth2 import get_current_user
 from database import models
@@ -49,5 +49,5 @@ def signup(request:CreateUser, db: Session = Depends(get_db)):
 
 
 @router.get("/profile")
-def profile(gcurrent_user: models.User = Depends(get_current_user)):
-    return {"message": "Hello World"}
+def profile(current_user: models.User = Depends(get_current_user),db: Session = Depends(get_db)):
+    return [current_user,get_current_user_id(db,current_user)]

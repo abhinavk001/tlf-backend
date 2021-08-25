@@ -4,7 +4,7 @@ Entrypoint
 from fastapi import FastAPI
 from database.database import set_up_database
 from database import models
-from routers import auth
+from routers import auth, activity
 
 
 app = FastAPI()
@@ -22,3 +22,4 @@ def hello():
 
 
 app.include_router(auth.router)
+app.include_router(activity.router)
