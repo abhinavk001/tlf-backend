@@ -1,10 +1,11 @@
 """
 User schemas
 """
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 from pydantic.types import constr
 from enums.roles import Roles
+from schemas.activities import ShowActivity
 
 contact_field = constr(max_length=10, min_length=10, regex="^[0-9]{10}$")
 
@@ -43,8 +44,10 @@ class ShowUser(BaseModel):
     """
     name: str
     email: str
+    points: int
+    activities: List[ShowActivity] = []
 
-    class Config:
+    class Config():
         """
         Enable ORM mode
         """
@@ -59,7 +62,7 @@ class User(UserBase):
     is_active: bool
     activity_id: int
 
-    class Config:
+    class Config():
         """Enable ORM mode"""
         orm_mode = True
 

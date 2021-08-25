@@ -3,7 +3,6 @@ Activity schema
 """
 from pydantic import BaseModel
 from typing import Optional
-from .user import ShowUser
 
 
 class ActivityBase(BaseModel):
@@ -31,13 +30,23 @@ class UpdateActivity(BaseModel):
     duration: Optional[int] = None
 
 
+class ShowActivity(ActivityBase):
+    """
+    Show activity model
+    """
+    class Config:
+        """
+        Enable orm mode
+        """
+        orm_mode = True
+
+
 class Activity(ActivityBase):
     """
     Full Activity schema
     """
     id: int
-    is_complete: bool
-    user: ShowUser
+    is_complete: bool 
 
     class Config:
         """

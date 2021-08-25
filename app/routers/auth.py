@@ -46,8 +46,3 @@ def signup(request:CreateUser, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"User already exists")
     
     return new_user
-
-
-@router.get("/profile")
-def profile(current_user: models.User = Depends(get_current_user),db: Session = Depends(get_db)):
-    return [current_user,get_current_user_id(db,current_user)]
