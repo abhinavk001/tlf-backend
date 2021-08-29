@@ -1,8 +1,9 @@
 """
 Activity schema
 """
-from pydantic import BaseModel
 from typing import Optional
+from pydantic import BaseModel
+from datetime import date
 
 
 class ActivityBase(BaseModel):
@@ -11,7 +12,9 @@ class ActivityBase(BaseModel):
     """
     name: str
     points: int
-    duration: int
+    assign_date: date
+    due_date: date
+    completed_date: Optional[date] = None
 
 
 class CreateActivity(ActivityBase):
@@ -21,35 +24,32 @@ class CreateActivity(ActivityBase):
     pass
 
 
+class CreateActivityByStaff(ActivityBase):
+    """
+    Assigning an Activity to a Staff member
+    """
+    email: str
+
+
 class UpdateActivity(BaseModel):
     """
     Update Activity model
     """
     name: Optional[str] = None
     points: Optional[int] = None
-    duration: Optional[int] = None
+    assign_date: Optional[date] = None
+    due_date: Optional[date] = None
+    completed_date: Optional[date] = None
+    is_complete: Optional[bool] = None
 
 
 class ShowActivity(ActivityBase):
     """
     Show activity model
     """
+    id: int
     class Config:
         """
         Enable orm mode
-        """
-        orm_mode = True
-
-
-class Activity(ActivityBase):
-    """
-    Full Activity schema
-    """
-    id: int
-    is_complete: bool 
-
-    class Config:
-        """
-        Enable ORM mode
         """
         orm_mode = True

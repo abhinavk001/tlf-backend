@@ -1,7 +1,7 @@
 """
 Database Models
 """
-from sqlalchemy import Column, String, Boolean, Integer, Enum, ForeignKey
+from sqlalchemy import Column, String, Boolean, Integer, Enum, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database.config_db import Base
 from enums.roles import Roles
@@ -17,7 +17,9 @@ class Activity(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False)
     points = Column(Integer, nullable=False)
-    duration = Column(Integer, nullable=False)
+    assign_date = Column(DateTime, nullable=False)
+    due_date = Column(DateTime, nullable=False)
+    completed_date = Column(DateTime)
     is_complete = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship("User", back_populates="activities")
@@ -38,7 +40,7 @@ class User(Base):
     email = Column(String(50),unique=True, nullable=False)
     name = Column(String(50), nullable=False)
     password = Column(String(50), nullable=False)
-    is_active = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     contact = Column(String(50))
     points = Column(Integer, default=0)
     role = Column(Enum(Roles), default=Roles.USER, nullable=False)

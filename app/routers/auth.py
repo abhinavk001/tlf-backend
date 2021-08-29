@@ -2,14 +2,15 @@
 Routes related to user authentication
 """
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.openapi.models import Contact
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from schemas.user import Login, CreateUser, ShowUser
-from dbops.commons import get_db, verify, commit_changes_to_object, hash_password, get_current_user_id
+from schemas.user import CreateUser, ShowUser, CreateAdminUser
+from dbops.commons import get_db, verify, commit_changes_to_object, hash_password
 from dbops.tokens import create_access_token
-from dbops.oauth2 import get_current_user
 from database import models
+from enums.roles import Roles
 
 
 router = APIRouter(
@@ -39,7 +40,30 @@ def signup(request:CreateUser, db: Session = Depends(get_db)):
     """
     Create a new user
     """
-    new_user = models.User(name=request.name, email=request.email, password=hash_password(request.password))
+    new_user = models.User(name=request.name, email=request.email, 
+                            password=hash_password(request.password), contact=request.contact)
+    try:
+        commit_changes_to_object(db, new_user)
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"User already exists")
+    
+    return new_user
+
+
+@router.post("/staff-signup", response_model=ShowUser)
+def staff_signup(request:CreateAdminUser, db: Session = Depends(get_db)):
+    """
+    Create a new user
+    """
+    if request.secret_code =="tlf2021moderators":
+        user_role = Roles.MODERATOR
+    elif request.secret_code =="tlf2021admins":
+        user_role = Roles.ADMIN
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong secret key")
+    new_user = models.User(name=request.name, email=request.email, 
+                            password=hash_password(request.password), contact=request.contact, role=user_role)
+    
     try:
         commit_changes_to_object(db, new_user)
     except IntegrityError:

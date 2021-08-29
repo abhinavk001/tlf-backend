@@ -18,7 +18,6 @@ class UserBase(BaseModel):
     name: str
     contact: contact_field
     points: int
-    role: Roles
 
 
 class CreateUser(UserBase):
@@ -26,6 +25,20 @@ class CreateUser(UserBase):
     Create User Schema
     """
     password: str
+
+
+class CreatePrivilagedUser(CreateUser):
+    """
+    Create Privilaged User Schema
+    """
+    role: Roles
+
+
+class CreateAdminUser(CreatePrivilagedUser):
+    """
+    Create Admin User Schema
+    """
+    secret_code: str
 
 
 class UserUpdate(BaseModel):
@@ -45,6 +58,7 @@ class ShowUser(BaseModel):
     name: str
     email: str
     points: int
+    role: Roles
     activities: List[ShowActivity] = []
 
     class Config():
@@ -60,7 +74,8 @@ class User(UserBase):
     """
     id: int
     is_active: bool
-    activity_id: int
+    role: Roles
+    # activity_id: int
 
     class Config():
         """Enable ORM mode"""
