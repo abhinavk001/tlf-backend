@@ -25,11 +25,24 @@ def parse_activity_request(activity, request):
     return updated_items
 
 
+def assign_points_on_completion(current_activity, request, db):
+    """
+    Assign points to the user based on activity completion
+    """
+    if current_activity.is_marked == False:
+        if current_activity.is_complete == False and  request.is_complete == True:
+            current_user = db.query(models.User).filter(models.User.id == current_activity.user_id).first()
+            current_user.points += current_activity.points
+            db.commit()
+
+
 def save_updated_activity(activity, db, request):
     """
     Save modified activity details to database
     """
     updated_items = parse_activity_request(activity, request)
+
+    assign_points_on_completion(activity, updated_items, db)
 
     activity.name = updated_items.name
     activity.points = updated_items.points

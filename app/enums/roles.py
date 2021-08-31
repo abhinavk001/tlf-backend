@@ -18,3 +18,12 @@ hierarchy = {
     Roles.MODERATOR: 1,
     Roles.USER: 0
 }
+
+
+class Stacks(Enum):
+    """
+    Stacks enum
+    """
+    PYTHON = "PYTHON"
+    JAVASCRIPT = "JAVASCRIPT"
+    FLUTTER = "FLUTTER"

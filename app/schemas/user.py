@@ -4,7 +4,7 @@ User schemas
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr, constr
 from pydantic.types import constr
-from enums.roles import Roles
+from enums.roles import Roles, Stacks
 from schemas.activity import ShowActivity
 
 contact_field = constr(max_length=10, min_length=10, regex="^[0-9]{10}$")
@@ -23,20 +23,23 @@ class CreateUser(UserBase):
     """
     Create User Schema
     """
+    stack: Stacks
     password: constr(min_length=8)
 
 
-class CreatePrivilagedUser(CreateUser):
+class CreatePrivilagedUser(UserBase):
     """
     Create Privilaged User Schema
     """
+    password: constr(min_length=8)
     role: Roles
 
 
-class CreateAdminUser(CreateUser):
+class CreateAdminUser(UserBase):
     """
     Create Admin User Schema
     """
+    password: constr(min_length=8)
     secret_code: str
 
 
@@ -47,6 +50,7 @@ class UpdateUser(BaseModel):
     email: Optional[EmailStr] = None
     contact: Optional[contact_field] = None
     name: Optional[str] = None
+    stack: Optional[Stacks] = None
 
 class UpdateUserByStaff(UpdateUser):
     """
@@ -64,6 +68,7 @@ class ShowUser(BaseModel):
     email: EmailStr
     points: int
     role: Roles
+    stack: Optional[Stacks] = None
     activities: List[ShowActivity] = []
 
     class Config():
@@ -81,6 +86,7 @@ class User(UserBase):
     is_active: bool
     points: int
     role: Roles
+    stack: Optional[Stacks] = None
     # activity_id: int
 
     class Config():
