@@ -3,3 +3,4 @@ env
 __pycache__
 *.db
 sqlite.db-journal
+env.py

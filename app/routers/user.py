@@ -8,9 +8,10 @@ from sqlalchemy.sql import roles
 from database import models
 from dbops.oauth2 import get_current_user
 from dbops.commons import get_db, hash_password, commit_changes_to_object
-from schemas.user import ShowUser, CreatePrivilagedUser
+from schemas.user import ShowUser, CreatePrivilagedUser, UpdateUser, UpdateUserByStaff
 from database import models
 from dbops.role_dependancy import RoleChecker
+from CRUD.user import save_updated_user, save_updated_user_by_staff, get_user_by_id, delete_user, save_deactivated_user
 
 
 router = APIRouter(
@@ -24,19 +25,60 @@ def get_profile(current_user: models.User = Depends(get_current_user), db: Sessi
     """
     if not current_user:
         raise HTTPException(status_code=404, detail="User not found")
-    return current_user
+    
+    user_info = db.query(models.User).filter(models.User.email == current_user.email).first()
+    return user_info
 
 
-allow_create_resource = RoleChecker(["ADMIN"])
-@router.get("/p", response_model=ShowUser, dependencies=[Depends(allow_create_resource)])
-def get_profile_update(current_user: ShowUser = Depends(get_current_user), db: Session = Depends(get_db)):
+allow_view_others_progress = RoleChecker(["ADMIN", "MODERATOR"])
+@router.get("/profile/staff", dependencies=[Depends(allow_view_others_progress)])
+def get_progess(current_user: ShowUser = Depends(get_current_user), db: Session = Depends(get_db)):
     """
-    Get the profile of the current user.
+    Get the progress of all facilitators.
+    under construction!!!!!!!!!
     """
-    return current_user
+    all_activity = db.query(models.Activity).filter(models.Activity.user.has(is_active=True)).all()
+    return all_activity
 
 
-@router.post("/create", response_model=ShowUser, dependencies=[Depends(allow_create_resource)])
+@router.patch("/update/{id}")
+def update_user(id: int, request: UpdateUser, current_user: models.User = Depends(get_current_user), 
+                    db: Session = Depends(get_db)):
+    """
+    Update an existing User
+    """
+    user = get_user_by_id(id, db)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.id != current_user.id:
+        raise HTTPException(status_code=403, detail="You do not have permission to edit this User")
+    
+    save_updated_user(db, user, request)
+    return {
+        "detail": "User updated successfully"
+    }
+
+
+allow_modify_other_users = RoleChecker(["ADMIN", "MODERATOR"])
+@router.patch("/update/staff/{id}", dependencies=[Depends(allow_modify_other_users)])
+def update_user_by_staff(id: int, request: UpdateUserByStaff, current_user: models.User = Depends(get_current_user), 
+                    db: Session = Depends(get_db)):
+    """
+    Update an existing User by a staff member.
+    """
+    user = get_user_by_id(id, db)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    save_updated_user_by_staff(db, user, request)
+    return {
+        "detail": "User updated successfully"
+    }
+
+
+allow_create_user = RoleChecker(["ADMIN"])
+@router.post("/create", response_model=ShowUser, dependencies=[Depends(allow_create_user)])
 def create_user(request:CreatePrivilagedUser, current_user: ShowUser = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Create new admins or mods account
@@ -50,19 +92,30 @@ def create_user(request:CreatePrivilagedUser, current_user: ShowUser = Depends(g
     
     return new_user
 
+
+@router.patch("/deactivate-user/{id}", dependencies=[Depends(allow_modify_other_users)])
+def deactivate_user(id: int, current_user: models.User = Depends(get_current_user), 
+                    db: Session = Depends(get_db)):
+    """
+    Update an existing User by a staff member.
+    """
+    user = get_user_by_id(id, db)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    save_deactivated_user(db, user)
+    return {
+        "detail": "User deactivated successfully"
+    }
+
+
 allow_delete_activity = RoleChecker(["ADMIN", "MODERATOR"])
 @router.delete("/delete/{id}", dependencies=[Depends(allow_delete_activity)], status_code=status.HTTP_204_NO_CONTENT)
 def delete(id: int, current_user: ShowUser = Depends(get_current_user), db: Session = Depends(get_db)):
     """
-    Delete an existing activity
+    Delete an existing User
     """
-    user = db.query(models.User).filter(models.User.id == id)
-    if not user.first():
-        raise HTTPException(status_code=404, detail="User not found")
-
-    user.delete(synchronize_session=False)
-
-    db.commit()
-    return {"message": "User deleted"}
+    delete_user(db, id)
+    return {"detail": "User deleted"}
 
     

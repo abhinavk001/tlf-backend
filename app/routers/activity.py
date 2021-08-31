@@ -4,12 +4,13 @@ Routes for managing user activity
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import user
-from schemas.activities import CreateActivity, UpdateActivity, CreateActivityByStaff
+from schemas.activity import CreateActivity, UpdateActivity, CreateActivityByStaff
 from dbops.commons import get_db, commit_changes_to_object
 from dbops.oauth2 import get_current_user
 from database import models
 from schemas.user import ShowUser
 from dbops.role_dependancy import RoleChecker
+from CRUD.activity import save_updated_activity, get_activity_by_id, delete_activity
 
 
 router = APIRouter(
@@ -33,7 +34,7 @@ def create_activity(request: CreateActivity, current_user: models.User = Depends
 
 allow_create_activity = RoleChecker(["ADMIN", "MODERATOR"])
 @router.post("/create/staff",dependencies=[Depends(allow_create_activity)], status_code=status.HTTP_201_CREATED)
-def create_activity(request: CreateActivityByStaff, current_user: models.User = Depends(get_current_user), 
+def assign_activity(request: CreateActivityByStaff, current_user: models.User = Depends(get_current_user), 
                     db: Session = Depends(get_db)):
     """
     Assign facilitators an activity by a staff member
@@ -54,27 +55,15 @@ def update_activity(id: int, request: UpdateActivity, current_user: models.User 
     """
     Update an existing activity
     """
-    activity = db.query(models.Activity).filter(models.Activity.id == id).first()
+    activity = get_activity_by_id(id, db)
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
 
     if activity.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="You do not have permission to edit this activity")
     
-    stored_activity_data = activity.__dict__
-    stored_activity_model = UpdateActivity(**stored_activity_data)
-    updated_data = request.dict(exclude_unset=True)
-    updated_items = stored_activity_model.copy(update=updated_data)
-
-    activity.name = updated_items.name
-    activity.points = updated_items.points
-    activity.assign_date = updated_items.assign_date
-    activity.due_date = updated_items.due_date
-    activity.completed_date = updated_items.completed_date
-    activity.is_complete = updated_items.is_complete
-    db.commit()
-
-    return {"detail":updated_items}
+    save_updated_activity(activity, db, request)
+    return {"detail":"Successfully updated activity"}
 
 
 allow_delete_activity = RoleChecker(["ADMIN", "MODERATOR"])
@@ -83,11 +72,5 @@ def delete(id: int, current_user: ShowUser = Depends(get_current_user), db: Sess
     """
     Delete an existing activity
     """
-    activity = db.query(models.Activity).filter(models.Activity.id == id)
-    if not activity.first():
-        raise HTTPException(status_code=404, detail="Activity not found")
-
-    activity.delete(synchronize_session=False)
-
-    db.commit()
+    delete_activity(id, db)
     return {"message": "Activity deleted"}
