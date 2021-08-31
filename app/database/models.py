@@ -5,7 +5,7 @@ from sqlalchemy import Column, String, Boolean, Integer, Enum, ForeignKey, DateT
 from sqlalchemy.orm import relationship
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from database.config_db import Base
-from enums.roles import Roles
+from enums.roles import Roles, Stacks
 from dbops.tokens import SECRET_KEY
 
 
@@ -45,6 +45,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     contact = Column(String(50))
     points = Column(Integer, default=0)
+    stack = Column(Enum(Stacks))
     role = Column(Enum(Roles), default=Roles.USER, nullable=False)
     activities = relationship("Activity", back_populates="user")
 

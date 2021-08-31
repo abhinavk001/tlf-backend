@@ -39,6 +39,7 @@ def save_updated_user(db, user, request):
     user.name = updated_items.name
     user.email = updated_items.email
     user.contact = updated_items.contact
+    user.stack = updated_items.stack
     db.commit()
 
 
@@ -51,6 +52,7 @@ def save_updated_user_by_staff(db, user, request):
     user.email = updated_items.email
     user.contact = updated_items.contact
     user.points = updated_items.points
+    user.stack = updated_items.stack
     db.commit()
 
 

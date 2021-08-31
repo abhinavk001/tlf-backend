@@ -40,7 +40,7 @@ def signup(request:CreateUser, db: Session = Depends(get_db)):
     """
     Create a new user
     """
-    new_user = models.User(name=request.name, email=request.email, 
+    new_user = models.User(name=request.name, email=request.email, stack=request.stack,
                             password=hash_password(request.password), contact=request.contact)
     try:
         commit_changes_to_object(db, new_user)
