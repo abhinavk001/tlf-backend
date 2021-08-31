@@ -3,7 +3,7 @@ A backend app built using fastapi.
 
 ## How to setup
 - Clone this repo.
-- Open your terminal/command propmt inside the repo
+- Open your terminal/command prompt inside the repo
 - Create and activte a virtual environment.
 - Run <code> pip install -r requirements.txt </code> in your terminal.
 - cd into the app folder <code>cd app</code>.
