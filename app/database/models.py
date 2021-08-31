@@ -23,6 +23,7 @@ class Activity(Base):
     due_date = Column(DateTime, nullable=False)
     completed_date = Column(DateTime)
     is_complete = Column(Boolean, default=False)
+    is_marked = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship("User", back_populates="activities")
 

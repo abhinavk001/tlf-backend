@@ -35,7 +35,7 @@ def login(request:OAuth2PasswordRequestForm = Depends(), db: Session = Depends(g
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/signup", response_model=ShowUser)
+@router.post("/signup", response_model=ShowUser, status_code=status.HTTP_201_CREATED)
 def signup(request:CreateUser, db: Session = Depends(get_db)):
     """
     Create a new user
@@ -50,7 +50,7 @@ def signup(request:CreateUser, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/staff-signup", response_model=ShowUser)
+@router.post("/staff-signup", response_model=ShowUser, status_code=status.HTTP_201_CREATED)
 def staff_signup(request:CreateAdminUser, db: Session = Depends(get_db)):
     """
     Create a new moderator or admin user
