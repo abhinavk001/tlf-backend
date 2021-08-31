@@ -2,10 +2,10 @@
 User schemas
 """
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, constr
 from pydantic.types import constr
 from enums.roles import Roles
-from schemas.activities import ShowActivity
+from schemas.activity import ShowActivity
 
 contact_field = constr(max_length=10, min_length=10, regex="^[0-9]{10}$")
 
@@ -14,17 +14,16 @@ class UserBase(BaseModel):
     """
     Base User Schema
     """
-    email: str
+    email: EmailStr
     name: str
     contact: contact_field
-    points: int
 
 
 class CreateUser(UserBase):
     """
     Create User Schema
     """
-    password: str
+    password: constr(min_length=8)
 
 
 class CreatePrivilagedUser(CreateUser):
@@ -34,29 +33,35 @@ class CreatePrivilagedUser(CreateUser):
     role: Roles
 
 
-class CreateAdminUser(CreatePrivilagedUser):
+class CreateAdminUser(CreateUser):
     """
     Create Admin User Schema
     """
     secret_code: str
 
 
-class UserUpdate(BaseModel):
+class UpdateUser(BaseModel):
     """
     Update user schema
     """
-    email: Optional[str]
-    contact: Optional[contact_field]
-    name: Optional[str]
-    password: Optional[str]
+    email: Optional[EmailStr] = None
+    contact: Optional[contact_field] = None
+    name: Optional[str] = None
+
+class UpdateUserByStaff(UpdateUser):
+    """
+    Updating a user by staff
+    """
+    points: Optional[int] = None
 
 
 class ShowUser(BaseModel):
     """
     Show basic user data
     """
+    id: int
     name: str
-    email: str
+    email: EmailStr
     points: int
     role: Roles
     activities: List[ShowActivity] = []
@@ -74,6 +79,7 @@ class User(UserBase):
     """
     id: int
     is_active: bool
+    points: int
     role: Roles
     # activity_id: int
 
@@ -86,8 +92,8 @@ class Login(BaseModel):
     """
     Login schema
     """
-    username: str
-    password: str
+    username: EmailStr
+    password: constr(min_length=8)
 
 
 class Token(BaseModel):
@@ -102,4 +108,4 @@ class TokenData(BaseModel):
     """
     Token data schema
     """
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None

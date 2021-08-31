@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from typing import Optional
 from schemas.user import TokenData
 
-SECRET_KEY = os.environ.get["SECRET_KEY"]
+SECRET_KEY = "f2089a467fcd8eac98baed2ccdc7e1f1d18c4cd99334f032298dda7106b13dc3"
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

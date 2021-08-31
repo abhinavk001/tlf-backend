@@ -53,7 +53,7 @@ def signup(request:CreateUser, db: Session = Depends(get_db)):
 @router.post("/staff-signup", response_model=ShowUser)
 def staff_signup(request:CreateAdminUser, db: Session = Depends(get_db)):
     """
-    Create a new user
+    Create a new moderator or admin user
     """
     if request.secret_code =="tlf2021moderators":
         user_role = Roles.MODERATOR

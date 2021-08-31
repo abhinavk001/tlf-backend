@@ -3,8 +3,10 @@ Database Models
 """
 from sqlalchemy import Column, String, Boolean, Integer, Enum, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from database.config_db import Base
 from enums.roles import Roles
+from dbops.tokens import SECRET_KEY
 
 
 class Activity(Base):
@@ -45,6 +47,10 @@ class User(Base):
     points = Column(Integer, default=0)
     role = Column(Enum(Roles), default=Roles.USER, nullable=False)
     activities = relationship("Activity", back_populates="user")
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(SECRET_KEY, expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8')
 
     def __repr__(self):
         return '<User %r>' % self.name
