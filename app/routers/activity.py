@@ -59,10 +59,13 @@ def update_activity(id: int, request: UpdateActivity, current_user: models.User 
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    if activity.user_id != current_user.id:
+    if activity.user_id == current_user.id:
+        save_updated_activity(activity, db, request)
+    elif activity.user != current_user.id and current_user.role.value != "USER":
+        save_updated_activity(activity, db, request)
+    else:
         raise HTTPException(status_code=403, detail="You do not have permission to edit this activity")
-    
-    save_updated_activity(activity, db, request)
+
     return {"detail":"Successfully updated activity"}
 
 
