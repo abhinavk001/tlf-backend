@@ -1,6 +1,7 @@
 """
 Routes related to user authentication
 """
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.openapi.models import Contact
 from fastapi.security import OAuth2PasswordRequestForm
@@ -55,9 +56,9 @@ def staff_signup(request:CreateAdminUser, db: Session = Depends(get_db)):
     """
     Create a new moderator or admin user
     """
-    if request.secret_code =="tlf2021moderators":
+    if request.secret_code ==os.environ.get("MODS_SECRET_CODE"):
         user_role = Roles.MODERATOR
-    elif request.secret_code =="tlf2021admins":
+    elif request.secret_code ==os.environ.get("ADMINS_SECRET_CODE"):
         user_role = Roles.ADMIN
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong secret key")
