@@ -42,7 +42,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(50),unique=True, nullable=False)
     name = Column(String(50), nullable=False)
-    password = Column(String(50), nullable=False)
+    password = Column(String(128), nullable=False)
     is_active = Column(Boolean, default=True)
     contact = Column(String(50))
     points = Column(Integer, default=0)
