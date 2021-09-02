@@ -7,6 +7,8 @@ from sqlalchemy import create_engine
 
 def set_up_database(env_variable="DATABASE_URL"):
     """Set up connection to a db"""
-    database_url = environ.get(env_variable)
-    return create_engine(database_url or "sqlite:///./sqlite.db", 
+    uri = environ.get(env_variable)  # or other relevant config var
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+    return create_engine(uri or "sqlite:///./sqlite.db", 
                         connect_args={"check_same_thread": False})
