@@ -31,13 +31,16 @@ def get_profile(current_user: models.User = Depends(get_current_user), db: Sessi
 
 
 allow_view_others_progress = RoleChecker(["ADMIN", "MODERATOR"])
-@router.get("/profile/staff", dependencies=[Depends(allow_view_others_progress)])
+@router.get("/profile/staff" ,dependencies=[Depends(allow_view_others_progress)])
 def get_progess(current_user: ShowUser = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Get the progress of all facilitators.
-    under construction!!!!!!!!!
     """
-    all_activity = db.query(models.Activity).filter(models.Activity.user.has(is_active=True)).all()
+    all_activity = db.query(
+                            models.Activity, models.User.name, models.User.id).order_by(
+                            models.Activity.assign_date.desc()).filter(
+                            models.Activity.user.has(is_active=True)).filter(
+                            models.Activity.user_id == models.User.id).all()
     return all_activity
 
 
