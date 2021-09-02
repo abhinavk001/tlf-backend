@@ -10,5 +10,4 @@ def set_up_database(env_variable="DATABASE_URL"):
     uri = environ.get(env_variable)  # or other relevant config var
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
-    return create_engine(uri or "sqlite:///./sqlite.db", 
-                        connect_args={"check_same_thread": False})
+    return create_engine(uri)
