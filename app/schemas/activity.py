@@ -47,6 +47,7 @@ class ShowActivity(ActivityBase):
     """
     id: int
     points: int
+    is_complete: bool
     class Config:
         """
         Enable orm mode
