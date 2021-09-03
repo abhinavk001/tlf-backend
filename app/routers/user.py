@@ -123,5 +123,5 @@ def delete(id: int, current_user: ShowUser = Depends(get_current_user),
     """
     Delete an existing User
     """
-    delete_user(db, id)
+    delete_user(db, id, current_user)
     return {"detail": "User deleted"}
