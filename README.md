@@ -11,4 +11,4 @@ A backend app built using fastapi.
 - Run <code>uvicorn main:app --reload</code>.
 - Open http://localhost:8000/docs in your browser.
 
-### Visit https://tlf-backend.herokuapp.com 🙂
+### Visit https://tlf-backend.herokuapp.com/docs 🙂
