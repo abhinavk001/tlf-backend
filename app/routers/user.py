@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import models
 from dbops.oauth2 import get_current_user
-from dbops.commons import get_db, hash_password, commit_changes_to_object
+from dbops.commons import get_db, hash_password, commit_changes_to_object, remove_time
 from schemas.user import ShowUser, CreatePrivilagedUser, UpdateUser, UpdateUserByStaff
 from database import models
 from dbops.role_dependancy import RoleChecker
@@ -36,10 +36,11 @@ def get_progess(current_user: ShowUser = Depends(get_current_user), db: Session 
     Get the progress of all facilitators.
     """
     all_activity = db.query(
-                            models.Activity, models.User.name, models.User.id, models.User.stack).order_by(
+                            models.Activity, models.User.name, models.User.id, models.User.stack, models.User.email).order_by(
                             models.Activity.assign_date.desc()).filter(
                             models.Activity.user.has(is_active=True)).filter(
                             models.Activity.user_id == models.User.id).all()
+    all_activity = list(map(remove_time, all_activity))
     return all_activity
 
 
