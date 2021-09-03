@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from schemas.activity import UpdateActivity
 from database import models
 from dbops.points_dependancy import get_points
+from CRUD.user import get_user_by_email
 
 
 def get_activity_by_id(id, db):
@@ -40,7 +41,7 @@ def assign_points_on_completion(current_activity, request, db, points):
         db.commit()
 
 
-def save_updated_activity(activity, db, request):
+def save_updated_activity(activity, db, request, email):
     """
     Save modified activity details to database
     """
@@ -48,6 +49,10 @@ def save_updated_activity(activity, db, request):
     points = get_points(updated_items)
 
     assign_points_on_completion(activity, updated_items, db, points)
+
+    current_user = get_user_by_email(db, email)
+    if current_user.id != activity.user_id:
+        activity.user_id = current_user.id
 
     activity.name = updated_items.name
     activity.points = points

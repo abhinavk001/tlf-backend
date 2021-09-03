@@ -78,6 +78,19 @@ class ShowUser(BaseModel):
         orm_mode = True
 
 
+class ForgotPassword(BaseModel):
+    """
+    Email id of user to reset password
+    """
+    email: EmailStr
+
+    class Config():
+        """
+        Enable ORM mode
+        """
+        orm_mode = True
+
+
 class User(UserBase):
     """
     Full User Schema(As in DB)

@@ -7,11 +7,12 @@ from fastapi.openapi.models import Contact
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from schemas.user import CreateUser, ShowUser, CreateAdminUser
+from schemas.user import CreateUser, ShowUser, CreateAdminUser, ForgotPassword
 from dbops.commons import get_db, verify, commit_changes_to_object, hash_password
 from dbops.tokens import create_access_token
 from database import models
 from enums.roles import Roles
+from mail.send_mail import send_reset_email
 
 
 router = APIRouter(
@@ -71,3 +72,18 @@ def staff_signup(request:CreateAdminUser, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"User already exists")
     
     return new_user
+
+
+@router.post("/forgot-password")
+def forgot_password(request: ForgotPassword, db: Session = Depends(get_db)):
+    """"
+    Get email from request and send a reset password email to it
+    """
+    user = db.query(models.User).filter_by(email=request.email).first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED, detail="User not found")
+    
+    send_reset_email(user)
+
+    return {"detail": "Mail sent"}

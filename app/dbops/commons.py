@@ -37,3 +37,12 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def remove_time(user_activity):
+    user_activity["Activity"].assign_date = user_activity["Activity"].assign_date.date()
+    user_activity["Activity"].due_date = user_activity["Activity"].due_date.date()
+
+    if user_activity["Activity"].completed_date:
+        user_activity["Activity"].completed_date = user_activity["Activity"].completed_date.date()
+    return user_activity
