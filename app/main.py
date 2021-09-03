@@ -12,8 +12,8 @@ from routers import auth, activity, user
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",
-    "localhost:3000"
+    "https://tlf-aswin.netlify.app/",
+    "tlf-aswin.netlify.app"
 ]
 
 
