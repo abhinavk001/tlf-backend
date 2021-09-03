@@ -13,7 +13,8 @@ app = FastAPI()
 
 origins = [
     "https://tlf-aswin.netlify.app/",
-    "tlf-aswin.netlify.app"
+    "tlf-aswin.netlify.app",
+    "https://tlf-aswin.netlify.app"
 ]
 
 
