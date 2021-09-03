@@ -10,3 +10,5 @@ A backend app built using fastapi.
 - Set an environment variable named SECRET_KEY and assign it a 32 bit random string.
 - Run <code>uvicorn main:app --reload</code>.
 - Open http://localhost:8000/docs in your browser.
+
+### Visit https://tlf-backend.herokuapp.com 🙂
