@@ -1,7 +1,7 @@
 """
 Common utilities for database operations
 """
-from hashlib import sha256
+import math
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from database.config_db import Base, SessionLocal
@@ -21,13 +21,6 @@ def verify(hashed_password: str, plain_password: str):
     return CryptContext(schemes=["bcrypt"], deprecated="auto").verify(plain_password, hashed_password)
 
 
-def hash_string(*kwargs):
-    """
-    Hash string with sha256
-    """
-    return sha256(("".join([str(i) for i in kwargs])).encode("utf-8")).hexdigest()
-
-
 def commit_changes_to_object(database: Session, obj: Base):
     """Finish the database transaction and refresh session"""
     database.add(obj)
@@ -44,13 +37,12 @@ def get_db():
         yield db
     finally:
         db.close()
-    
 
-# def send_reset_email(user):
-#     token = user.get_reset_token()
-#     msg = Message('Password reset request', sender='noreply@demo.com', recipients=[user.email])
-#     msg.body = f'''To reset your password, visit the following link:
-#     { url_for('users.reset_token', token=token, _external=True) }
-#     If you did not make this request then please ingnore this mail.
-#     '''
-#     mail.send(msg)
+
+def remove_time(user_activity):
+    user_activity["Activity"].assign_date = user_activity["Activity"].assign_date.date()
+    user_activity["Activity"].due_date = user_activity["Activity"].due_date.date()
+
+    if user_activity["Activity"].completed_date:
+        user_activity["Activity"].completed_date = user_activity["Activity"].completed_date.date()
+    return user_activity

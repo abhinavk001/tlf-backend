@@ -4,6 +4,7 @@ CRUD operations for User
 from fastapi import HTTPException
 from database import models
 from schemas.user import UpdateUser
+from enums.roles import hierarchy
 
 
 def get_user_by_id(id, db):
@@ -64,13 +65,18 @@ def save_deactivated_user(db, user):
     db.commit()
 
 
-def delete_user(db, id):
+def delete_user(db, id, current_user):
     """
     Delete a user
     """
     user = db.query(models.User).filter(models.User.id == id)
     if not user.first():
         raise HTTPException(status_code=404, detail="User not found")
+
+    if hierarchy[current_user.role] <= hierarchy[user.first().role]:
+        raise HTTPException(status_code=403, detail="You don't have permission to delete that user")
+    
+    db.query(models.Activity).filter(models.Activity.user_id == id).delete(synchronize_session=False)
 
     user.delete(synchronize_session=False)
 

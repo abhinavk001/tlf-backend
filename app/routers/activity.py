@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import user
 from schemas.activity import CreateActivity, UpdateActivity, CreateActivityByStaff
 from dbops.commons import get_db, commit_changes_to_object
+from dbops.points_dependancy import get_points
 from dbops.oauth2 import get_current_user
 from database import models
 from schemas.user import ShowUser
@@ -24,7 +25,8 @@ def create_activity(request: CreateActivity, current_user: models.User = Depends
     """
     Create a new activity
     """
-    new_activity = models.Activity(name=request.name, points=request.points, assign_date=request.assign_date,
+    points = get_points(request)
+    new_activity = models.Activity(name=request.name, points=points, assign_date=request.assign_date,
                                     due_date=request.due_date, completed_date=request.completed_date,
                                     user_id=current_user.id)
     commit_changes_to_object(db, new_activity)
@@ -40,7 +42,11 @@ def assign_activity(request: CreateActivityByStaff, current_user: models.User = 
     Assign facilitators an activity by a staff member
     """
     facilitator = db.query(models.User).filter(models.User.email == request.email).first()
-    new_activity = models.Activity(name=request.name, points=request.points, assign_date=request.assign_date,
+    if facilitator is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    points = get_points(request)
+    new_activity = models.Activity(name=request.name, points=points, assign_date=request.assign_date,
                                     due_date=request.due_date, completed_date=request.completed_date,
                                     user_id=facilitator.id)
     commit_changes_to_object(db, new_activity)
@@ -59,10 +65,13 @@ def update_activity(id: int, request: UpdateActivity, current_user: models.User 
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    if activity.user_id != current_user.id:
+    if activity.user_id == current_user.id:
+        save_updated_activity(activity, db, request, email=current_user.email)
+    elif activity.user_id != current_user.id and current_user.role.value != "USER":
+        save_updated_activity(activity, db, request, email=request.email)
+    else:
         raise HTTPException(status_code=403, detail="You do not have permission to edit this activity")
-    
-    save_updated_activity(activity, db, request)
+
     return {"detail":"Successfully updated activity"}
 
 
@@ -72,5 +81,5 @@ def delete(id: int, current_user: ShowUser = Depends(get_current_user), db: Sess
     """
     Delete an existing activity
     """
-    delete_activity(id, db)
+    delete_activity(id, db, current_user)
     return {"message": "Activity deleted"}

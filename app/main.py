@@ -2,6 +2,7 @@
 Entrypoint
 """
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.sql.functions import user
 from database.database import set_up_database
 from database import models
@@ -10,6 +11,19 @@ from routers import auth, activity, user
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:3000",
+    "localhost:3000"
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 models.Base.metadata.create_all(set_up_database())
 
