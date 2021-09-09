@@ -74,7 +74,7 @@ def staff_signup(request:CreateAdminUser, db: Session = Depends(get_db)):
 
 
 @router.post("/forgot-password")
-def forgot_password(request: ForgotPassword, db: Session = Depends(get_db)):
+async def forgot_password(request: ForgotPassword, db: Session = Depends(get_db)):
     """"
     Get email from request and send a reset password email to it
     """
@@ -83,6 +83,6 @@ def forgot_password(request: ForgotPassword, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED, detail="User not found")
     
-    send_reset_email(user)
+    await send_reset_email(user, request)
 
     return {"detail": "Mail sent"}
