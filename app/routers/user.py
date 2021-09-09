@@ -50,7 +50,7 @@ def get_others_profile(id: int, current_user: ShowUser = Depends(get_current_use
     """
     Get the account information of other facilitator.
     """
-    facilitator = db.query(models.User).filter(models.User.id == id).first()
+    facilitator = get_user_by_id(id, db)
     if not facilitator:
         raise HTTPException(status_code=404, detail="User not found")
     
