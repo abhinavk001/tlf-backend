@@ -23,7 +23,6 @@ class Activity(Base):
     due_date = Column(DateTime, nullable=False)
     completed_date = Column(DateTime)
     is_complete = Column(Boolean, default=False)
-    is_marked = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship("User", back_populates="activities")
 
@@ -51,8 +50,23 @@ class User(Base):
     activities = relationship("Activity", back_populates="user")
 
     def get_reset_token(self, expires_sec=1800):
-        s = Serializer(SECRET_KEY, expires_sec)
-        return s.dumps({'user_id': self.id}).decode('utf-8')
+        """
+        Create and return token for reset password functionality
+        """
+        token = Serializer(SECRET_KEY, expires_sec)
+        return token.dumps({'user_id': self.id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        """
+        Verify the reset password token passed
+        """
+        token = Serializer(SECRET_KEY)
+        try:
+            user_id = token.loads(token)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
 
     def __repr__(self):
         return '<User %r>' % self.name

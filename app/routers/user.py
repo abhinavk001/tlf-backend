@@ -44,6 +44,19 @@ def get_progess(current_user: ShowUser = Depends(get_current_user), db: Session 
     return all_activity
 
 
+allow_view_other_accounts = RoleChecker(["ADMIN", "MODERATOR"])
+@router.get("/profile/staff/{id}" ,dependencies=[Depends(allow_view_others_progress)], response_model=ShowUser)
+def get_others_profile(id: int, current_user: ShowUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Get the account information of other facilitator.
+    """
+    facilitator = get_user_by_id(id, db)
+    if not facilitator:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return facilitator
+
+
 @router.patch("/update/{id}")
 def update_user(id: int, request: UpdateUser, current_user: models.User = Depends(get_current_user), 
                     db: Session = Depends(get_db)):
